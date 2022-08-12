@@ -12,6 +12,7 @@
 */
 #include <Arduino.h>
 #include <stdio.h>
+#include "soc/pcnt_struct.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/portmacro.h"
 #include "freertos/task.h"
@@ -24,7 +25,7 @@
 #include "esp_log.h"
 
 // the number of the LED pin
-const int pwmFanPin1 = 21;  // 21 corresponds to GPIO21?
+const int pwmFanPin1 = 14;  // 21 corresponds to GPIO21?
 
 // setting PWM properties
 const int freq = 1;
@@ -170,9 +171,9 @@ int countRPM(int firstTime, int lastTime, int pulseTotal, int pulsePerRev) {
 void setup() {
   // put your setup code here, to run once:
   ledcSetup(ledChannel,freq,resolution);
-  
+  Serial.begin(115200);
   // attach the channel to the GPIO to be controlled
-  ledcAttachPin(21, ledChannel);
+  ledcAttachPin(pwmFanPin1, ledChannel);
   ledcWrite(ledChannel, 10); // 1Hz PWM with duty cycle of 10/255
 }
 
@@ -181,7 +182,7 @@ void loop()
   /* Initialize PCNT event queue and PCNT functions */
   pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
   pcnt_init_channel(PCNT_UNIT_0,4); // Initialize Unit 0 to pin 4
-  pcnt_init_channel(PCNT_UNIT_1,21); // Initialize Unit 1 to pin 21
+  pcnt_init_channel(PCNT_UNIT_1,pwmFanPin1); // Initialize Unit 1 to pin 21
   pcnt_init_channel(PCNT_UNIT_2,5); // Unit 2 to pin 5
   int RPM0 = -1; // Fan 0 RPM
   int RPM1 = -1; // Fan 1 RPM
